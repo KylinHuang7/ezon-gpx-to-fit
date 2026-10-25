@@ -69,6 +69,7 @@ If you modify the encoder, two details will silently break your output (both lea
 - The generated FIT contains `file_id` + `record` messages only (no session/lap/device_info). Mainstream platforms recognize it as an activity; if a platform strictly requires a session message, the encoder needs extending.
 - Altitude is taken from the GPX `<ele>` as-is; flat-land GPS noise is not smoothed.
 - Speed is computed from consecutive-point differences; the last point reuses the previous speed.
+- **Per-split (per-km) pace/speed is derived from the GPX coordinates, not the watch's odometer.** EZON GPX exposes only a `<heartrate>` extension — no distance/speed field — so cumulative distance is recomputed via haversine and instantaneous speed from consecutive-point deltas. The watch's own per-km pace (shown in the EZON app) comes from its internal GPS + accelerometer + stride fusion odometer, which is **not** exported in the GPX. As a result a FIT viewer's per-km pace differs from the EZON app: the coordinate-derived pace typically reads *faster*, because GPS jitter inflates distance at slow / warm-up speeds that the watch filters out. **Total distance, total time, and every heart-rate sample are accurate and match the app** (e.g., 10-21: GPX 5.278 km vs app 5.27 km; per-km pace ~8:50/km from coordinates vs ~10:23/km in app). If you need the watch's exact per-km splits, export its native FIT/TCX instead of rebuilding from GPX. Smoothing the coordinates does **not** fix this — it only shrinks total distance and still cannot reproduce the watch's odometer curve — so no smoothing is applied.
 
 ## License
 
@@ -149,6 +150,7 @@ grep -c HeartRateBpm check.tcx
 - 生成的 FIT 只含 `file_id` 与 `record` 两类消息（无 session/lap/device_info）。主流平台能识别为一次活动；若某平台强制要求 session 消息，需扩展编码器。
 - 海拔直接沿用 GPX 的 `<ele>`，平地 GPS 噪点不做平滑。
 - 速度由相邻点差分计算，末点沿用上一帧速度。
+- **每公里配速/速度按 GPX 坐标推算，与 EZON App 的逐公里配速可能不一致。** EZON 的 GPX 扩展里只有 `<heartrate>`，没有距离/速度字段，所以累计距离由坐标 haversine 重算、瞬时速度由相邻点差分得到。而手表 App 里显示的每公里配速来自它内部「GPS+加速度计+步幅」融合里程计——这个里程计**没有**导出到 GPX。因此 FIT 查看器里的每公里配速会和 EZON App 不同：坐标直算的配速通常**偏快**，因为慢速/热身段 GPS 抖动会虚增距离，而手表做了滤波。但**总距离、总时长、每一拍心率都是准的，与 App 吻合**（例：10-21 GPX 5.278 km vs App 5.27 km；坐标直算每公里约 8:50，App 约 10:23）。若需要手表原生的逐公里分段，请用手表导出的**原生 FIT/TCX**，而不是用 GPX 重建。对坐标做平滑也解决不了这个问题——只会把总距离一起拉低、且仍还原不出手表的里程计曲线，所以本转换**不做平滑**。
 
 ## 许可
 
