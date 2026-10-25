@@ -74,6 +74,32 @@ If you modify the encoder, two details will silently break your output (both lea
 
 [MIT](LICENSE)
 
+## Releasing to the WorkBuddy marketplace
+
+The skill package (zip) is **not** committed to the repo. It is built automatically when you publish a GitHub Release:
+
+1. Bump the `version:` field in `SKILL.md`.
+2. Commit and push, then create a **Release** (or push a tag). The `build-zip.yml` workflow runs and attaches `ezon-gpx-to-fit.zip` to that release.
+3. Download the zip from the release page and upload it to **open.workbuddy.cn** → 发布管理 → 技能 → 创建.
+
+You can also trigger the build manually from the Actions tab ("Run workflow"); the zip is then provided as a downloadable artifact.
+
+> The zip is intentionally kept out of git to avoid drift — the source files are the single source of truth, and the package is always rebuilt from them.
+
+---
+
+## 发布到 WorkBuddy 开放平台
+
+skill 打包文件（zip）**不纳入 git**。发布 GitHub Release 时由 `build-zip.yml` 自动生成：
+
+1. 更新 `SKILL.md` 里的 `version:` 字段；
+2. 提交并推送，然后创建 **Release**（或打 tag）。`build-zip.yml` 会自动把 `ezon-gpx-to-fit.zip` 挂到该 Release 下；
+3. 从 Release 页下载 zip，上传到 **open.workbuddy.cn** → 发布管理 → 技能 → 创建。
+
+也可在 Actions 页手动 "Run workflow" 触发，产物以 artifact 形式提供下载。
+
+> zip 刻意不入 git，避免源码与打包产物漂移——源码才是唯一真相源，每次都从源码重建。
+
 ---
 
 <a id="中文说明"></a>

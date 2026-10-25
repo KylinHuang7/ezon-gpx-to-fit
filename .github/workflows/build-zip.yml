@@ -1,0 +1,33 @@
+name: Build skill zip
+
+# 在发布 Release 时自动把源码打包成 WorkBuddy 开放平台所需的 zip
+# （解压后第一层直接是 SKILL.md，符合平台解析规则），并挂到该 Release 下。
+# 也可在 Actions 页手动 "Run workflow" 触发，产物以 artifact 形式提供。
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # 用于将 zip 上传到 release
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Package skill zip (SKILL.md at root, no nested folder)
+        run: zip -r ezon-gpx-to-fit.zip SKILL.md scripts references -x "*.DS_Store"
+
+      - name: Upload to release (when triggered by a release)
+        if: github.event_name == 'release'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "${{ github.event.release.tag_name }}" ezon-gpx-to-fit.zip --clobber
+
+      - name: Upload as artifact (manual run)
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ezon-gpx-to-fit
+          path: ezon-gpx-to-fit.zip
